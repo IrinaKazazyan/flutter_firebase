@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_firebase/services/auth.dart';
 
 class Register extends StatefulWidget {
-
   final Function toggleView;
+
   Register({this.toggleView});
 
   @override
@@ -13,9 +13,11 @@ class Register extends StatefulWidget {
 class _RegisterState extends State<Register> {
   final AuthService _auth = AuthService();
   final _formKey = GlobalKey<FormState>();
+
 //  text field state
   String email = '';
   String password = '';
+  String error = '';
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +44,7 @@ class _RegisterState extends State<Register> {
             children: [
               SizedBox(height: 5.0),
               TextFormField(
+                validator: (val) => val.isEmpty ? "Enter an email" : null,
                 onChanged: (val) {
                   setState(() => email = val);
                 },
@@ -49,6 +52,8 @@ class _RegisterState extends State<Register> {
               SizedBox(height: 5.0),
               TextFormField(
                 obscureText: true,
+                validator: (val) =>
+                    val.length < 6 ? "Enter a password 6+ char long" : null,
                 onChanged: (val) {
                   setState(() => password = val);
                 },
@@ -61,12 +66,19 @@ class _RegisterState extends State<Register> {
                   style: TextStyle(color: Colors.white),
                 ),
                 onPressed: () async {
-                  if(_formKey.currentState.validate()) {
-                    print(email);
-                    print(password);
+                  if (_formKey.currentState.validate()) {
+                    dynamic result = await _auth.registerWithEmailAndPassword(
+                        email, password);
+                    if (result == null) {
+                      setState(() => error = 'please supply a valid email');
+                    }
                   }
-
                 },
+              ),
+              SizedBox(height: 10.0),
+              Text(
+                error,
+                style: TextStyle(color: Colors.red, fontSize: 14.0),
               )
             ],
           ),
